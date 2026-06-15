@@ -14,9 +14,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.14+-blue?logo=python">
+  <img src="https://img.shields.io/badge/Python-3.11+-blue?logo=python">
   <img src="https://img.shields.io/badge/Textual-8.2.7-blueviolet">
-  <img src="https://img.shields.io/badge/Platform-Windows%2010%2F11-0078d4?logo=windows">
+  <img src="https://img.shields.io/badge/Platform-Windows%20|%20macOS%20|%20Linux-0078d4?logo=windows">
   <img src="https://img.shields.io/badge/License-MIT-green">
 </p>
 
