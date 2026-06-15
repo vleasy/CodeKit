@@ -1,0 +1,64 @@
+[python]
+name = "Python"
+icon = "🐍"
+website = "https://python.org"
+download_url = "https://www.python.org/downloads/"
+winget_id = "Python.Python"
+choco_id = "python"
+scoop_id = "python"
+versions_available = ["3.14", "3.13", "3.12", "3.11", "3.10"]
+package_manager = "pip"
+check_command = "python --version"
+detect_pattern = "python(\\d+\\.\\d+)"
+
+[nodejs]
+name = "Node.js"
+icon = "⬢"
+website = "https://nodejs.org"
+download_url = "https://nodejs.org/en/download/"
+winget_id = "OpenJS.NodeJS"
+choco_id = "nodejs"
+scoop_id = "nodejs"
+versions_available = ["23.x", "22.x", "21.x", "20.x (LTS)", "18.x"]
+package_manager = "npm"
+check_command = "node --version"
+detect_pattern = "v(\\d+\\.\\d+)"
+
+[java]
+name = "Java"
+icon = "☕"
+website = "https://adoptium.net"
+download_url = "https://adoptium.net/temurin/releases/"
+winget_id = "EclipseAdoptium.Temurin.21.JDK"
+choco_id = "temurin"
+scoop_id = "temurin-lts-jdk"
+versions_available = ["21 (LTS)", "17 (LTS)", "11 (LTS)", "8"]
+package_manager = "maven"
+check_command = "java -version 2>&1"
+detect_pattern = "(\\d+\\.\\d+\\.\\d+)"
+
+[rust]
+name = "Rust"
+icon = "🦀"
+website = "https://rust-lang.org"
+download_url = "https://www.rust-lang.org/tools/install"
+winget_id = "Rustlang.Rustup"
+choco_id = "rust"
+scoop_id = "rust"
+versions_available = ["stable", "beta", "nightly"]
+package_manager = "cargo"
+check_command = "rustc --version"
+detect_pattern = "(\\d+\\.\\d+)"
+
+[cpp]
+name = "C/C++"
+icon = "⚙"
+website = "https://visualstudio.microsoft.com/vs/features/cplusplus/"
+download_url = "https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022"
+winget_id = "Microsoft.VisualStudio.2022.BuildTools"
+choco_id = "visualstudio2022buildtools"
+scoop_id = "visualstudio2022-buildtools"
+versions_available = ["2022", "2019", "2017"]
+package_manager = "vcpkg"
+check_command = "cl.exe 2>&1"
+detect_pattern = ""

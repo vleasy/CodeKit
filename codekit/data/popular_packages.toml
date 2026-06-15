@@ -1,0 +1,75 @@
+[python]
+popular = [
+  { name = "requests", version = "latest", desc = "HTTP library for humans" },
+  { name = "numpy", version = "latest", desc = "Scientific computing" },
+  { name = "flask", version = "latest", desc = "Lightweight web framework" },
+  { name = "django", version = "latest", desc = "High-level web framework" },
+  { name = "fastapi", version = "latest", desc = "Modern, fast web framework" },
+  { name = "pandas", version = "latest", desc = "Data analysis library" },
+  { name = "pillow", version = "latest", desc = "Python Imaging Library" },
+  { name = "beautifulsoup4", version = "latest", desc = "HTML/XML parser" },
+  { name = "pytest", version = "latest", desc = "Testing framework" },
+  { name = "click", version = "latest", desc = "CLI tool creation" },
+  { name = "rich", version = "latest", desc = "Rich terminal formatting" },
+  { name = "aiohttp", version = "latest", desc = "Async HTTP client/server" },
+]
+
+[nodejs]
+popular = [
+  { name = "express", version = "latest", desc = "Web framework for Node.js" },
+  { name = "next", version = "latest", desc = "React framework" },
+  { name = "typescript", version = "latest", desc = "TypeScript language" },
+  { name = "axios", version = "latest", desc = "HTTP client" },
+  { name = "lodash", version = "latest", desc = "Utility library" },
+  { name = "react", version = "latest", desc = "UI library" },
+  { name = "vue", version = "latest", desc = "Progressive framework" },
+  { name = "prisma", version = "latest", desc = "ORM for Node.js" },
+  { name = "jest", version = "latest", desc = "Testing framework" },
+  { name = "eslint", version = "latest", desc = "Code linter" },
+  { name = "prettier", version = "latest", desc = "Code formatter" },
+  { name = "commander", version = "latest", desc = "CLI tool creation" },
+]
+
+[java]
+popular = [
+  { name = "spring-boot-starter-web", version = "latest", desc = "Spring Boot web starter" },
+  { name = "junit-jupiter", version = "latest", desc = "JUnit 5 testing" },
+  { name = "hibernate-core", version = "latest", desc = "ORM framework" },
+  { name = "log4j-core", version = "latest", desc = "Logging framework" },
+  { name = "jackson-databind", version = "latest", desc = "JSON processing" },
+  { name = "lombok", version = "latest", desc = "Boilerplate reducer" },
+  { name = "mockito-core", version = "latest", desc = "Mocking framework" },
+  { name = "slf4j-api", version = "latest", desc = "Logging facade" },
+  { name = "maven-compiler-plugin", version = "latest", desc = "Maven compiler" },
+  { name = "postgresql", version = "latest", desc = "PostgreSQL driver" },
+]
+
+[rust]
+popular = [
+  { name = "serde", version = "latest", desc = "Serialization framework" },
+  { name = "tokio", version = "latest", desc = "Async runtime" },
+  { name = "reqwest", version = "latest", desc = "HTTP client" },
+  { name = "clap", version = "latest", desc = "CLI argument parser" },
+  { name = "rayon", version = "latest", desc = "Data parallelism" },
+  { name = "actix-web", version = "latest", desc = "Web framework" },
+  { name = "anyhow", version = "latest", desc = "Error handling" },
+  { name = "thiserror", version = "latest", desc = "Error derive macros" },
+  { name = "rand", version = "latest", desc = "Random number generation" },
+  { name = "regex", version = "latest", desc = "Regular expressions" },
+  { name = "tracing", version = "latest", desc = "Logging/diagnostics" },
+  { name = "axum", version = "latest", desc = "Web framework" },
+]
+
+[cpp]
+popular = [
+  { name = "boost", version = "latest", desc = "C++ utility library" },
+  { name = "fmt", version = "latest", desc = "Formatting library" },
+  { name = "nlohmann-json", version = "latest", desc = "JSON library" },
+  { name = "spdlog", version = "latest", desc = "Logging library" },
+  { name = "catch2", version = "latest", desc = "Testing framework" },
+  { name = "asio", version = "latest", desc = "Networking library" },
+  { name = "range-v3", version = "latest", desc = "Range library" },
+  { name = "eigen", version = "latest", desc = "Linear algebra" },
+  { name = "protobuf", version = "latest", desc = "Protocol Buffers" },
+  { name = "opencv", version = "latest", desc = "Computer vision" },
+]

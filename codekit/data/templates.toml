@@ -1,0 +1,166 @@
+[cli.python]
+name = "Python CLI"
+language = "python"
+filelist = ["main.py", "README.md", ".gitignore"]
+
+[cli.python.contents.main_py]
+path = "main.py"
+content = """\
+#!/usr/bin/env python3
+import sys
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    print(f"Hello from CodeKit! Args: {args}")
+
+
+if __name__ == "__main__":
+    main()
+"""
+
+[cli.python.contents.readme]
+path = "README.md"
+content = """\
+# {{project_name}}
+
+A Python CLI project created with CodeKit.
+
+## Usage
+
+```bash
+python main.py
+```
+"""
+
+[cli.python.contents.gitignore]
+path = ".gitignore"
+content = """\
+__pycache__/
+*.pyc
+.env
+venv/
+dist/
+*.egg-info/
+"""
+
+[cli.nodejs]
+name = "Node.js CLI"
+language = "nodejs"
+filelist = ["index.js", "package.json", "README.md"]
+
+[cli.nodejs.contents.index_js]
+path = "index.js"
+content = """\
+#!/usr/bin/env node
+
+const args = process.argv.slice(2);
+console.log(`Hello from CodeKit! Args: ${args.join(" ")}`);
+"""
+
+[cli.nodejs.contents.package_json]
+path = "package.json"
+content = """\
+{
+  "name": "{{project_name}}",
+  "version": "1.0.0",
+  "description": "A CLI project created with CodeKit",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
+"""
+
+[cli.nodejs.contents.readme]
+path = "README.md"
+content = """\
+# {{project_name}}
+
+A Node.js CLI project created with CodeKit.
+
+## Usage
+
+```bash
+node index.js
+```
+"""
+
+[web.python]
+name = "Python Web (FastAPI)"
+language = "python"
+filelist = ["main.py", "requirements.txt", "README.md"]
+
+[web.python.contents.main_py]
+path = "main.py"
+content = """\
+from fastapi import FastAPI
+
+app = FastAPI(title="{{project_name}}")
+
+@app.get("/")
+def root():
+    return {"message": "Hello from CodeKit!"}
+"""
+
+[web.python.contents.requirements]
+path = "requirements.txt"
+content = """\
+fastapi
+uvicorn
+"""
+
+[web.python.contents.readme]
+path = "README.md"
+content = """\
+# {{project_name}}
+
+A FastAPI project created with CodeKit.
+
+## Usage
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+"""
+
+[lib.rust]
+name = "Rust Library"
+language = "rust"
+filelist = ["src/lib.rs", "Cargo.toml", "README.md"]
+
+[lib.rust.contents.lib_rs]
+path = "src/lib.rs"
+content = """\
+pub fn hello() -> &'static str {
+    "Hello from CodeKit!"
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hello() {
+        assert_eq!(hello(), "Hello from CodeKit!");
+    }
+}
+"""
+
+[lib.rust.contents.cargo_toml]
+path = "Cargo.toml"
+content = """\
+[package]
+name = "{{project_name}}"
+version = "1.0.0"
+edition = "2021"
+"""
+
+[lib.rust.contents.readme]
+path = "README.md"
+content = """\
+# {{project_name}}
+
+A Rust library project created with CodeKit.
+"""
