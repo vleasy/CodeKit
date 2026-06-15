@@ -1,7 +1,6 @@
 import subprocess
 import shutil
 import webbrowser
-from pathlib import Path
 
 
 def check_winget() -> bool:
@@ -14,6 +13,22 @@ def check_choco() -> bool:
 
 def check_scoop() -> bool:
     return shutil.which("scoop") is not None
+
+
+def check_brew() -> bool:
+    return shutil.which("brew") is not None
+
+
+def check_apt() -> bool:
+    return shutil.which("apt") is not None
+
+
+def check_dnf() -> bool:
+    return shutil.which("dnf") is not None
+
+
+def check_pacman() -> bool:
+    return shutil.which("pacman") is not None
 
 
 def install_via_winget(package_id: str) -> subprocess.Popen:
@@ -33,6 +48,34 @@ def install_via_choco(package_id: str) -> subprocess.Popen:
 def install_via_scoop(package_id: str) -> subprocess.Popen:
     return subprocess.Popen(
         ["scoop", "install", package_id],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+    )
+
+
+def install_via_brew(package_id: str) -> subprocess.Popen:
+    return subprocess.Popen(
+        ["brew", "install", package_id],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+    )
+
+
+def install_via_apt(package_id: str) -> subprocess.Popen:
+    return subprocess.Popen(
+        ["sudo", "apt", "install", "-y", package_id],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+    )
+
+
+def install_via_dnf(package_id: str) -> subprocess.Popen:
+    return subprocess.Popen(
+        ["sudo", "dnf", "install", "-y", package_id],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+    )
+
+
+def install_via_pacman(package_id: str) -> subprocess.Popen:
+    return subprocess.Popen(
+        ["sudo", "pacman", "-S", "--noconfirm", package_id],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
     )
 

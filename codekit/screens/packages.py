@@ -1,10 +1,12 @@
+import threading
+import shutil
+from pathlib import Path
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, ScrollableContainer
 from textual.widgets import Static, Button, Input
 from textual.binding import Binding
 from rich.text import Text
-from pathlib import Path
-import threading
 
 from screens.base_screen import BaseScreen
 from backends.language_manager import get_languages, detect_installed_languages
@@ -12,6 +14,8 @@ from backends.package_manager import (
     get_popular, search_packages, install_package,
     list_installed_packages, get_package_manager,
     check_manager, uninstall_package,
+    invalidate_cache, get_available_python_managers,
+    check_pipenv, check_poetry,
 )
 from backends.template_engine import get_template_categories, create_project
 
@@ -23,12 +27,30 @@ class PackagesScreen(BaseScreen):
     BINDINGS = [
         Binding("escape", "go_back", "Назад", show=False),
         Binding("f2", "switch_lang", "RU/EN", show=True),
+        Binding("f3", "search_focus", "🔍", show=True),
+        Binding("f4", "toggle_manager", "📦", show=True),
         Binding("f5", "refresh", "🔄", show=True),
         Binding("f6", "show_templates", "📁", show=True),
     ]
 
     def action_show_templates(self) -> None:
         self._show_templates()
+
+    def action_search_focus(self) -> None:
+        inp = self.query_one("#search-input")
+        inp.focus()
+
+    def action_toggle_manager(self) -> None:
+        if self._current != "python":
+            return
+        mgrs = get_available_python_managers()
+        if len(mgrs) < 2:
+            return
+        idx = mgrs.index(self._python_manager) if self._python_manager in mgrs else 0
+        self._python_manager = mgrs[(idx + 1) % len(mgrs)]
+        status = self.query_one("#status-bar")
+        status.update(f"📦 Менеджер: {self._python_manager}")
+        self._show_packages(self._current)
 
     CSS = """
     PackagesScreen {
@@ -222,6 +244,7 @@ class PackagesScreen(BaseScreen):
         self._tmpl_name_input: Input | None = None
         self._tmpl_output: Static | None = None
         self._selected_template: str = ""
+        self._python_manager = "pip"
 
     def compose(self) -> ComposeResult:
         yield self.make_header(self._("pkg", "title"))
@@ -302,6 +325,8 @@ class PackagesScreen(BaseScreen):
             self.set_timer(delay, lambda w=w: w.styles.animate("opacity", 1.0, duration=0.35))
 
     def action_refresh(self) -> None:
+        invalidate_cache()
+        self._detected = detect_installed_languages()
         self._show_packages(self._current)
 
     def _show_search_history(self) -> None:
@@ -334,7 +359,11 @@ class PackagesScreen(BaseScreen):
         name = data.get("name", key)
         icon = data.get("icon", " ")
         pm = get_package_manager(key) or "—"
+        if key == "python":
+            pm = self._python_manager
         pm_ok = check_manager(key)
+        if key == "python" and pm != "pip":
+            pm_ok = shutil.which(pm) is not None
         installed_any = self._is_installed(key)
         pm_color = "#00e676" if pm_ok else "#ff5252"
         pm_icon = "✓" if pm_ok else "✗"
@@ -343,6 +372,11 @@ class PackagesScreen(BaseScreen):
             Text.from_markup(f"[bold #00d4ff]{icon} {name}[/]  [#005577]менеджер: [{pm_color}]{pm_icon} {pm}[/][/]"),
             classes="section-title",
         ))
+        if key == "python" and len(get_available_python_managers()) > 1:
+            container.mount(Static(
+                Text.from_markup(f"[#005577]F4 — переключить менеджер[/]"),
+                classes="pm-warn",
+            ))
         if not pm_ok:
             container.mount(Static(
                 Text.from_markup(f"[#ffb347]⚠ {pm} не найден в PATH. Некоторые функции недоступны.[/]"),
@@ -514,7 +548,8 @@ class PackagesScreen(BaseScreen):
         status.update(f"⬇ Установка {pkg_name}...")
 
         def run():
-            proc = install_package(self._current, pkg_name)
+            mgr = self._python_manager if self._current == "python" else ""
+            proc = install_package(self._current, pkg_name, manager=mgr)
             if proc:
                 for line in iter(proc.stdout.readline, ""):
                     self.call_from_thread(container.mount, Static(f"  [#005577]{line.rstrip()[:80]}[/]"))
@@ -548,7 +583,8 @@ class PackagesScreen(BaseScreen):
         status.update(f"✕ Удаление {pkg_name}...")
 
         def run():
-            proc = uninstall_package(self._current, pkg_name)
+            mgr = self._python_manager if self._current == "python" else ""
+            proc = uninstall_package(self._current, pkg_name, manager=mgr)
             if proc:
                 for line in iter(proc.stdout.readline, ""):
                     self.call_from_thread(container.mount, Static(f"  [#005577]{line.rstrip()[:80]}[/]"))

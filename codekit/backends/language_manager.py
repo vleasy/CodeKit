@@ -4,11 +4,12 @@ from typing import Optional
 
 from utils.config import load_languages_data
 from utils.installer import (
-    check_winget, check_choco, check_scoop,
+    check_winget, check_choco, check_scoop, check_brew, check_apt, check_dnf, check_pacman,
     install_via_winget, install_via_choco, install_via_scoop,
+    install_via_brew, install_via_apt, install_via_dnf, install_via_pacman,
     open_download_page, check_command_exists,
 )
-from backends.system_detector import detect_language
+from backends.system_detector import detect_language, get_os_installer
 
 
 LANG_DATA = load_languages_data()
@@ -41,6 +42,14 @@ def get_best_installer() -> str:
         return "choco"
     if check_scoop():
         return "scoop"
+    if check_brew():
+        return "brew"
+    if check_apt():
+        return "apt"
+    if check_dnf():
+        return "dnf"
+    if check_pacman():
+        return "pacman"
     return "manual"
 
 
@@ -50,18 +59,21 @@ def install_language(lang_key: str, installer: str = "auto") -> Optional[object]
         return None
     if installer == "auto":
         installer = get_best_installer()
-    if installer == "winget":
-        pid = data.get("winget_id")
-        if pid:
-            return install_via_winget(pid)
-    elif installer == "choco":
-        pid = data.get("choco_id")
-        if pid:
-            return install_via_choco(pid)
-    elif installer == "scoop":
-        pid = data.get("scoop_id")
-        if pid:
-            return install_via_scoop(pid)
+    pid = data.get(f"{installer}_id")
+    if not pid:
+        return None
+    fn_map = {
+        "winget": install_via_winget,
+        "choco": install_via_choco,
+        "scoop": install_via_scoop,
+        "brew": install_via_brew,
+        "apt": install_via_apt,
+        "dnf": install_via_dnf,
+        "pacman": install_via_pacman,
+    }
+    fn = fn_map.get(installer)
+    if fn:
+        return fn(pid)
     return None
 
 
