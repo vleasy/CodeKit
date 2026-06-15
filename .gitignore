@@ -16,3 +16,10 @@ env/
 *~
 .DS_Store
 Thumbs.db
+
+# Separate projects — not part of CodeKit
+/ESP32_MultiTester/
+/Slipgate/
+
+# Release archives
+*.zip
