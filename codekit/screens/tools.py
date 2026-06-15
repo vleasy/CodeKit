@@ -133,6 +133,9 @@ class ToolsScreen(BaseScreen):
         t.add_row("Python:", sys_info.python_version)
         t.add_row("winget:", "✓" if sys_info.has_winget else "—")
         t.add_row("choco:", "✓" if sys_info.has_choco else "—")
+        t.add_row("brew:", "✓" if sys_info.has_brew else "—")
+        t.add_row("apt:", "✓" if sys_info.has_apt else "—")
+        t.add_row("dnf:", "✓" if sys_info.has_dnf else "—")
         out.write(Text.from_markup("\n[bold #00d4ff]Система[/]\n"))
         out.write(t)
         out.write(Text.from_markup("\n[bold #00d4ff]Языки[/]\n"))
@@ -180,7 +183,7 @@ class ToolsScreen(BaseScreen):
 
     def _show_path(self, content: Vertical) -> None:
         path_val = os.environ.get("PATH", "")
-        entries = [p for p in path_val.split(";") if p.strip()]
+        entries = [p for p in path_val.split(os.pathsep) if p.strip()]
         content.mount(Static(f"\n[bold #00d4ff]{self._('tools', 'path')}[/]\n"))
         t = Table(style="#a8c8e8", border_style="#003366")
         t.add_column("#", style="#005577", width=3)

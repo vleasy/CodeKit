@@ -1,11 +1,52 @@
 import subprocess
 import shutil
+import time
 from typing import Optional
 
 from utils.config import load_popular_packages
 
 
 POPULAR = load_popular_packages()
+
+_cache: dict[str, tuple[float, list[dict]]] = {}
+_CACHE_TTL_SEARCH = 30
+_CACHE_TTL_LIST = 60
+
+
+def _cache_get(key: str, ttl: int) -> Optional[list[dict]]:
+    entry = _cache.get(key)
+    if entry and (time.monotonic() - entry[0]) < ttl:
+        return entry[1]
+    return None
+
+
+def _cache_set(key: str, data: list[dict]) -> None:
+    _cache[key] = (time.monotonic(), data)
+    if len(_cache) > 100:
+        stale = [k for k, (ts, _) in _cache.items() if (time.monotonic() - ts) > 120]
+        for k in stale:
+            del _cache[k]
+
+
+def invalidate_cache() -> None:
+    _cache.clear()
+
+
+def check_pipenv() -> bool:
+    return shutil.which("pipenv") is not None
+
+
+def check_poetry() -> bool:
+    return shutil.which("poetry") is not None
+
+
+def get_available_python_managers() -> list[str]:
+    mgrs = ["pip"]
+    if check_pipenv():
+        mgrs.append("pipenv")
+    if check_poetry():
+        mgrs.append("poetry")
+    return mgrs
 
 
 def get_package_manager(lang_key: str) -> Optional[str]:
@@ -32,14 +73,21 @@ def get_popular(lang_key: str) -> list[dict]:
 
 
 def search_packages(lang_key: str, query: str) -> list[dict]:
+    cache_key = f"search:{lang_key}:{query}"
+    cached = _cache_get(cache_key, _CACHE_TTL_SEARCH)
+    if cached is not None:
+        return cached
     mgr = get_package_manager(lang_key)
+    results = []
     if mgr == "pip":
-        return _search_pip(query)
+        results = _search_pip(query)
     elif mgr == "npm":
-        return _search_npm(query)
+        results = _search_npm(query)
     elif mgr == "cargo":
-        return _search_cargo(query)
-    return []
+        results = _search_cargo(query)
+    if results:
+        _cache_set(cache_key, results)
+    return results
 
 
 def _search_pip(query: str) -> list[dict]:
@@ -95,19 +143,29 @@ def _search_cargo(query: str) -> list[dict]:
         return []
 
 
-def install_package(lang_key: str, package_name: str) -> Optional[subprocess.Popen]:
-    mgr = get_package_manager(lang_key)
+def install_package(lang_key: str, package_name: str, manager: str = "") -> Optional[subprocess.Popen]:
+    mgr = manager or get_package_manager(lang_key)
     if mgr == "pip":
         return subprocess.Popen(
             ["pip", "install", package_name],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
         )
-    elif mgr == "npm":
+    if mgr == "pipenv":
+        return subprocess.Popen(
+            ["pipenv", "install", package_name],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+        )
+    if mgr == "poetry":
+        return subprocess.Popen(
+            ["poetry", "add", package_name],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+        )
+    if mgr == "npm":
         return subprocess.Popen(
             ["npm", "install", package_name],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
         )
-    elif mgr == "cargo":
+    if mgr == "cargo":
         return subprocess.Popen(
             ["cargo", "install", package_name],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
@@ -115,19 +173,29 @@ def install_package(lang_key: str, package_name: str) -> Optional[subprocess.Pop
     return None
 
 
-def uninstall_package(lang_key: str, package_name: str) -> Optional[subprocess.Popen]:
-    mgr = get_package_manager(lang_key)
+def uninstall_package(lang_key: str, package_name: str, manager: str = "") -> Optional[subprocess.Popen]:
+    mgr = manager or get_package_manager(lang_key)
     if mgr == "pip":
         return subprocess.Popen(
             ["pip", "uninstall", package_name, "-y"],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
         )
-    elif mgr == "npm":
+    if mgr == "pipenv":
+        return subprocess.Popen(
+            ["pipenv", "uninstall", package_name],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+        )
+    if mgr == "poetry":
+        return subprocess.Popen(
+            ["poetry", "remove", package_name],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+        )
+    if mgr == "npm":
         return subprocess.Popen(
             ["npm", "uninstall", package_name],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
         )
-    elif mgr == "cargo":
+    if mgr == "cargo":
         return subprocess.Popen(
             ["cargo", "uninstall", package_name],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
@@ -136,14 +204,21 @@ def uninstall_package(lang_key: str, package_name: str) -> Optional[subprocess.P
 
 
 def list_installed_packages(lang_key: str) -> list[dict]:
+    cache_key = f"list:{lang_key}"
+    cached = _cache_get(cache_key, _CACHE_TTL_LIST)
+    if cached is not None:
+        return cached
     mgr = get_package_manager(lang_key)
+    results = []
     if mgr == "pip":
-        return _list_pip()
+        results = _list_pip()
     elif mgr == "npm":
-        return _list_npm()
+        results = _list_npm()
     elif mgr == "cargo":
-        return _list_cargo()
-    return []
+        results = _list_cargo()
+    if results:
+        _cache_set(cache_key, results)
+    return results
 
 
 def _list_pip() -> list[dict]:

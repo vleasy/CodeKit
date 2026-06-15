@@ -1,7 +1,7 @@
 import platform
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 
@@ -24,6 +24,10 @@ class SystemInfo:
     has_winget: bool = False
     has_choco: bool = False
     has_scoop: bool = False
+    has_brew: bool = False
+    has_apt: bool = False
+    has_dnf: bool = False
+    has_pacman: bool = False
 
 
 def detect_system() -> SystemInfo:
@@ -31,7 +35,36 @@ def detect_system() -> SystemInfo:
     info.has_winget = shutil.which("winget") is not None
     info.has_choco = shutil.which("choco") is not None
     info.has_scoop = shutil.which("scoop") is not None
+    info.has_brew = shutil.which("brew") is not None
+    info.has_apt = shutil.which("apt") is not None
+    info.has_dnf = shutil.which("dnf") is not None
+    info.has_pacman = shutil.which("pacman") is not None
     return info
+
+
+def get_os_installer() -> str:
+    sys = platform.system()
+    if sys == "Windows":
+        if shutil.which("winget"):
+            return "winget"
+        if shutil.which("choco"):
+            return "choco"
+        if shutil.which("scoop"):
+            return "scoop"
+        return "manual"
+    if sys == "Darwin":
+        if shutil.which("brew"):
+            return "brew"
+        return "manual"
+    if sys == "Linux":
+        if shutil.which("apt"):
+            return "apt"
+        if shutil.which("dnf"):
+            return "dnf"
+        if shutil.which("pacman"):
+            return "pacman"
+        return "manual"
+    return "manual"
 
 
 def detect_language(lang_key: str, check_cmd: str) -> LanguageDetection:
@@ -58,7 +91,8 @@ def detect_language(lang_key: str, check_cmd: str) -> LanguageDetection:
 def get_disk_info() -> dict[str, str]:
     import shutil as shu
     info = {}
-    if platform.system() == "Windows":
+    sys = platform.system()
+    if sys == "Windows":
         import ctypes
         drives = []
         bitmask = ctypes.windll.kernel32.GetLogicalDrives()
@@ -68,11 +102,19 @@ def get_disk_info() -> dict[str, str]:
         for drive in drives:
             try:
                 total, used, free = shu.disk_usage(drive)
-                info[drive] = {
-                    "total": total // (1024**3),
-                    "used": used // (1024**3),
-                    "free": free // (1024**3),
-                }
+                info[drive] = {"total": total // (1024**3), "used": used // (1024**3), "free": free // (1024**3)}
             except PermissionError:
                 pass
+    elif sys == "Linux":
+        try:
+            total, used, free = shu.disk_usage("/")
+            info["/"] = {"total": total // (1024**3), "used": used // (1024**3), "free": free // (1024**3)}
+        except PermissionError:
+            pass
+    elif sys == "Darwin":
+        try:
+            total, used, free = shu.disk_usage("/")
+            info["/"] = {"total": total // (1024**3), "used": used // (1024**3), "free": free // (1024**3)}
+        except PermissionError:
+            pass
     return info
