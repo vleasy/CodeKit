@@ -1,0 +1,48 @@
+[app]
+name = "CodeKit"
+tagline = "Simple Developer Tool"
+version = "v1.0"
+
+[common]
+hint = "↑↓ navigate · Enter open · Esc back · F2 RU/EN"
+back = "Back"
+select = "Select"
+exit = "Exit"
+
+[menu]
+languages = "Install Languages"
+packages = "Libraries"
+installed = "What's Installed"
+tools = "Tools"
+
+[lang]
+title = "Install Languages"
+python = "Python"
+nodejs = "Node.js"
+java = "Java"
+cpp = "C/C++"
+rust = "Rust"
+install = "Install"
+manual = "Download Manually"
+auto = "Auto Install"
+link = "Download link:"
+note = "Select a language, then press the button"
+
+[pkg]
+title = "Search Libraries"
+search = "Find package..."
+info = "First install a language in the Languages section"
+installed = "Installed packages:"
+
+[inst]
+title = "What's Installed"
+empty = "Nothing installed yet."
+detail = "Details:"
+
+[tools]
+title = "Tools"
+diag = "System Diagnostics"
+templates = "Project Templates"
+versions = "Versions"
+path = "PATH Variables"
+choose = "Select a tool"
