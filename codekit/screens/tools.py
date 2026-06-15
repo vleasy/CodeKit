@@ -76,6 +76,9 @@ class ToolsScreen(BaseScreen):
         super().__init__(*args, **kwargs)
         self._langs = get_languages()
         self._current_tool = "diag"
+        self._diag_output: RichLog | None = None
+        self._tmpl_input: Input | None = None
+        self._tmpl_out: Static | None = None
 
     def compose(self) -> ComposeResult:
         yield self.make_header(self._("tools", "title"))
@@ -94,17 +97,19 @@ class ToolsScreen(BaseScreen):
             self._current_tool = bid[5:]
             self._show_tool(self._current_tool)
             self._refresh_sidebar()
-        elif bid == "diag-run":
+        elif event.button.classes and "diag-run" in event.button.classes:
             self._run_diag()
-        elif bid.startswith("tmpl-"):
-            self._create_from_template(bid[5:])
+        elif hasattr(event.button, "tmpl_key"):
+            self._create_from_template(event.button.tmpl_key)
 
     def _show_tool(self, tool: str) -> None:
         content = self.query_one("#content")
         content.remove_children()
         if tool == "diag":
-            content.mount(Button("🔍 Запустить проверку", id="diag-run"))
-            content.mount(RichLog(id="diag-output", highlight=True, markup=True))
+            btn = Button("🔍 Запустить проверку", classes="diag-run")
+            content.mount(btn)
+            self._diag_output = RichLog(highlight=True, markup=True)
+            content.mount(self._diag_output)
             self._run_diag()
         elif tool == "templates":
             self._show_templates_form(content)
@@ -122,7 +127,9 @@ class ToolsScreen(BaseScreen):
                 btn.classes = "tool-btn"
 
     def _run_diag(self) -> None:
-        out = self.query_one("#diag-output")
+        if not hasattr(self, "_diag_output"):
+            return
+        out = self._diag_output
         out.clear()
         sys_info = detect_system()
         t = Table.grid(padding=(0, 1))
@@ -152,15 +159,17 @@ class ToolsScreen(BaseScreen):
         cats = get_template_categories()
         for cat, tmpls in cats.items():
             for t in tmpls:
-                btn = Button(f"  {t['name']}  [{t['language']}]", id=f"tmpl-{t['key']}", classes="tmpl-btn")
+                btn = Button(f"  {t['name']}  [{t['language']}]", classes="tmpl-btn")
+                btn.tmpl_key = t['key']
                 content.mount(btn)
-        content.mount(Input(placeholder="Имя проекта (по умолч. my-project)", id="tmpl-name"))
-        content.mount(Static("", id="tmpl-output"))
+        self._tmpl_input = Input(placeholder="Имя проекта (по умолч. my-project)")
+        content.mount(self._tmpl_input)
+        self._tmpl_out = Static("")
+        content.mount(self._tmpl_out)
 
     def _create_from_template(self, tmpl_key: str) -> None:
-        name_input = self.query_one("#tmpl-name")
-        project_name = (name_input.value or "my-project").strip() or "my-project"
-        out = self.query_one("#tmpl-output")
+        project_name = (self._tmpl_input.value or "my-project").strip() or "my-project" if hasattr(self, "_tmpl_input") else "my-project"
+        out = self._tmpl_out if hasattr(self, "_tmpl_out") else Static("")
         try:
             files = create_project(tmpl_key, project_name, str(Path.cwd()))
             out.update(Text.from_markup(f"\n[#00e676]✓ Проект создан![/]\n"))

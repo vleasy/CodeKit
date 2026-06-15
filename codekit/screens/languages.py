@@ -102,7 +102,7 @@ class LanguagesScreen(BaseScreen):
     def _refresh_sidebar(self) -> None:
         sidebar = self.query_one("#sidebar")
         for btn in sidebar.query(".lang-btn"):
-            if btn.id == f"lang-{self._current}":
+            if hasattr(btn, "data_key") and btn.data_key == self._current:
                 btn.classes = "lang-btn lang-btn-active"
             else:
                 btn.classes = "lang-btn"
@@ -119,7 +119,7 @@ class LanguagesScreen(BaseScreen):
                 status = "●" if det and det.installed else "○"
                 style = "#00e676" if det and det.installed else "#005577"
                 classes = "lang-btn lang-btn-active" if key == self._current else "lang-btn"
-                btn = Button(f"{icon} {name} [{style}]{status}[/]", id=f"lang-{key}", classes=classes)
+                btn = Button(f"{icon} {name} [{style}]{status}[/]", classes=classes)
                 btn.data_key = key
                 sidebar.mount(btn)
 
@@ -145,15 +145,14 @@ class LanguagesScreen(BaseScreen):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         bid = event.button.id or ""
-        if bid.startswith("lang-"):
-            key = bid[5:]
-            self._current = key
-            self._show_lang(key)
-            self._refresh_sidebar()
-        elif bid == "btn-install":
+        if bid == "btn-install":
             self._do_install()
         elif bid == "btn-manual":
             self._do_manual()
+        elif hasattr(event.button, "data_key"):
+            self._current = event.button.data_key
+            self._show_lang(self._current)
+            self._refresh_sidebar()
 
     def _do_install(self) -> None:
         data = self._langs.get(self._current)
